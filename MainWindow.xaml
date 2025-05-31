@@ -1,0 +1,322 @@
+<Window x:Class="BMSSimulator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BMSSimulator"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf" 
+        mc:Ignorable="d"
+        Title="Advanced BMS Simulator" Height="900" Width="1200"
+        ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">    <Window.Resources>
+        <!-- Define styles for modern look -->
+        <Style x:Key="ModernButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Foreground" Value="#999999"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="StatusCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Gray" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        
+        <Style x:Key="ValueTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header -->
+            <RowDefinition Height="Auto"/> <!-- Control Panel -->
+            <RowDefinition Height="Auto"/> <!-- Status Dashboard -->
+            <RowDefinition Height="*"/>    <!-- Charts -->
+            <RowDefinition Height="Auto"/> <!-- Controls -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Style="{StaticResource StatusCardStyle}" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="⚡" FontSize="32" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="Advanced Battery Management System Simulator" 
+                           FontSize="24" FontWeight="Bold" 
+                           Foreground="#2196F3" 
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Control Panel -->
+        <Border Grid.Row="1" Style="{StaticResource StatusCardStyle}" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Margin="10">
+                    <TextBlock Text="Battery Capacity" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBox x:Name="CapacityTextBox" Height="30" FontSize="14" Text="100"/>
+                    <TextBlock Text="Ampere-hours (Ah)" FontSize="11" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Margin="10">
+                    <TextBlock Text="Initial SoC" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBox x:Name="InitialSoCTextBox" Height="30" FontSize="14" Text="100"/>
+                    <TextBlock Text="Percentage (%)" FontSize="11" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+                  <StackPanel Grid.Column="2" Margin="10">
+                    <TextBlock Text="Load Profile" Style="{StaticResource HeaderTextStyle}"/>
+                    <ComboBox x:Name="LoadProfileComboBox" Height="30" FontSize="14" 
+                              SelectedIndex="0" SelectionChanged="LoadProfileComboBox_SelectionChanged"/>
+                    <TextBlock x:Name="ProfileDescriptionText" Text="Real-world usage pattern" 
+                               FontSize="11" Foreground="Gray" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="3" Margin="10" VerticalAlignment="Center">
+                    <Button x:Name="StartButton" Content="🚀 Start Simulation" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Height="35" Click="StartButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Status Dashboard -->        <Grid Grid.Row="2" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- SoC Card -->
+            <Border Grid.Column="0" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="State of Charge" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock x:Name="SoCDisplay" Text="--%" Style="{StaticResource ValueTextStyle}" 
+                               Foreground="#4CAF50"/>
+                    <ProgressBar x:Name="SoCProgressBar" Height="8" Maximum="100" Value="0" 
+                                 Foreground="#4CAF50" Background="#E0E0E0" Margin="0,10,0,0"/>
+                    <TextBlock x:Name="SoCMethodText" Text="Kalman Filter" FontSize="10" 
+                               HorizontalAlignment="Center" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- SoH Card -->
+            <Border Grid.Column="1" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="State of Health" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock x:Name="SoHDisplay" Text="--%" Style="{StaticResource ValueTextStyle}" 
+                               Foreground="#FF9800"/>
+                    <ProgressBar x:Name="SoHProgressBar" Height="8" Maximum="100" Value="100" 
+                                 Foreground="#FF9800" Background="#E0E0E0" Margin="0,10,0,0"/>
+                    <TextBlock x:Name="CapacityFadeText" Text="No degradation" FontSize="10" 
+                               HorizontalAlignment="Center" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Voltage Card -->
+            <Border Grid.Column="2" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Battery Voltage" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock x:Name="VoltageDisplay" Text="--V" Style="{StaticResource ValueTextStyle}" 
+                               Foreground="#9C27B0"/>
+                    <TextBlock x:Name="VoltageStatus" Text="Normal" FontSize="12" 
+                               HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="InternalResistanceText" Text="Rint: -- mΩ" FontSize="10" 
+                               HorizontalAlignment="Center" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Temperature Card -->
+            <Border Grid.Column="3" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Temperature" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock x:Name="TemperatureDisplay" Text="--°C" Style="{StaticResource ValueTextStyle}" 
+                               Foreground="#F44336"/>
+                    <TextBlock x:Name="TemperatureStatus" Text="Normal" FontSize="12" 
+                               HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="TempEfficiencyText" Text="UI Eff: --%" FontSize="10" 
+                               HorizontalAlignment="Center" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Power Card -->
+            <Border Grid.Column="4" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Power Draw" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock x:Name="PowerDisplay" Text="--W" Style="{StaticResource ValueTextStyle}" 
+                               Foreground="#607D8B"/>
+                    <TextBlock x:Name="CurrentDisplay" Text="Current: --A" FontSize="12" 
+                               HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="LoadProfileText" Text="Profile: --" FontSize="10" 
+                               HorizontalAlignment="Center" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- EIS Card -->
+            <Border Grid.Column="5" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="EIS Analysis" Style="{StaticResource HeaderTextStyle}"/>
+                    <TextBlock x:Name="EISDisplay" Text="-- mΩ" Style="{StaticResource ValueTextStyle}" 
+                               Foreground="#795548"/>
+                    <TextBlock x:Name="EISStatus" Text="Impedance (mΩ)" FontSize="12" 
+                               HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="EISFrequencyText" Text="@ 1kHz" FontSize="10" 
+                               HorizontalAlignment="Center" Foreground="Gray" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Charts -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- SoC Chart -->
+            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="State of Charge Trend" Style="{StaticResource HeaderTextStyle}"/>
+                    <lvc:CartesianChart x:Name="SoCChart" Height="200">
+                        <lvc:CartesianChart.Series>
+                            <lvc:LineSeries Values="{Binding SoCValues}" PointGeometry="{x:Null}" 
+                                          StrokeThickness="3" Title="SoC" Stroke="#4CAF50"/>
+                        </lvc:CartesianChart.Series>
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Time (s)" Labels="{Binding TimeLabelsSoC}" FontSize="10"/>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="SoC (%)" MinValue="0" MaxValue="100" FontSize="10"/>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </StackPanel>
+            </Border>
+            
+            <!-- Voltage Chart -->
+            <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Voltage Trend" Style="{StaticResource HeaderTextStyle}"/>
+                    <lvc:CartesianChart x:Name="VoltageChart" Height="200">
+                        <lvc:CartesianChart.Series>
+                            <lvc:LineSeries Values="{Binding VoltageValues}" PointGeometry="{x:Null}" 
+                                          StrokeThickness="3" Title="Voltage" Stroke="#9C27B0"/>
+                        </lvc:CartesianChart.Series>
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Time (s)" Labels="{Binding TimeLabelsVoltage}" FontSize="10"/>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="Voltage (V)" MinValue="2.5" MaxValue="4.5" FontSize="10"/>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </StackPanel>
+            </Border>
+            
+            <!-- Temperature Chart -->
+            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Temperature Trend" Style="{StaticResource HeaderTextStyle}"/>
+                    <lvc:CartesianChart x:Name="TemperatureChart" Height="200">
+                        <lvc:CartesianChart.Series>
+                            <lvc:LineSeries Values="{Binding TemperatureValues}" PointGeometry="{x:Null}" 
+                                          StrokeThickness="3" Title="Temperature" Stroke="#F44336"/>
+                        </lvc:CartesianChart.Series>
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Time (s)" Labels="{Binding TimeLabelsTemperature}" FontSize="10"/>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="Temperature (°C)" MinValue="-10" MaxValue="50" FontSize="10"/>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </StackPanel>
+            </Border>
+            
+            <!-- Power Chart -->
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource StatusCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="Power Consumption" Style="{StaticResource HeaderTextStyle}"/>
+                    <lvc:CartesianChart x:Name="PowerChart" Height="200">
+                        <lvc:CartesianChart.Series>
+                            <lvc:LineSeries Values="{Binding PowerValues}" PointGeometry="{x:Null}" 
+                                          StrokeThickness="3" Title="Power" Stroke="#607D8B"/>
+                        </lvc:CartesianChart.Series>
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Time (s)" Labels="{Binding TimeLabelsPower}" FontSize="10"/>
+                        </lvc:CartesianChart.AxisX>                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="Power (W)" MinValue="0" FontSize="10"/>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Controls -->
+        <Border Grid.Row="4" Style="{StaticResource StatusCardStyle}" Margin="0,15,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="🕒" FontSize="16" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="TimeDisplay" Text="Time: 00:00:00" FontSize="14" FontWeight="Bold" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="🔄" FontSize="16" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock x:Name="CycleDisplay" Text="Cycles: 0" FontSize="14" FontWeight="Bold" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <Button Grid.Column="2" x:Name="ExportButton" Content="📊 Export Data" 
+                        Style="{StaticResource ModernButtonStyle}" Background="#4CAF50"
+                        Click="ExportButton_Click" IsEnabled="False" Margin="5"/>
+                
+                <Button Grid.Column="3" x:Name="StopButton" Content="⏹️ Stop Simulation" 
+                        Style="{StaticResource ModernButtonStyle}" Background="#F44336"
+                        Click="StopButton_Click" IsEnabled="False" Margin="5"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
